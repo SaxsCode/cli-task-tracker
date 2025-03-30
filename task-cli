@@ -4,22 +4,37 @@
 
 // argc - argv
 
-$command = $argv[1];
+class CLITaskApp {
 
-switch ($command) {
-    case 'add':
-        break;
-    case 'update':
-        break;
-    case 'delete':
-        break;
-    case 'mark-in-progress':
-        break;
-    case 'mark-done':
-        break;
-    case 'list':
-        break;
+    public $command = null;
+
+    public function run($argv) {
+
+        $this->setCommand($argv[1]);
+
+        switch ($this->command) {
+            case 'add':
+                $title = $argv[2];
+                break;
+            case 'update':
+                break;
+            case 'delete':
+                break;
+            case 'mark-in-progress':
+                break;
+            case 'mark-done':
+                break;
+            case 'list':
+                break;
+            default:
+                echo 'Unknown command: ' . $this->command;
+        }
+    }
+
+    public function setCommand($command) {
+        $this->command = $command;
+    }
 }
 
-readline($argv[1]);
-
+$app = new CLITaskApp();
+$app->run($argv);
