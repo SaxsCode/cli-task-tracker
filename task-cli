@@ -45,8 +45,14 @@ class CLITaskApp {
         $tasks = file_get_contents('tasks.json');
         $tempTasks = json_decode($tasks, true);
 
-        $tempTasks[] = $this->createTask(1, $description, 'todo', date('Y-m-d H:i:s'), date('Y-m-d H:i:s'));
-        file_put_contents('tasks.json', json_encode($tempTasks));
+        $id = 1;
+        if (!empty($tempTasks)) {
+            $id = max(array_column($tempTasks, 'id'));
+            $id++;
+        }
+
+        $tempTasks[] = $this->createTask($id, $description, 'todo', date('Y-m-d H:i:s'), date('Y-m-d H:i:s'));
+        file_put_contents('tasks.json', json_encode($tempTasks, JSON_PRETTY_PRINT));
     }
 }
 
