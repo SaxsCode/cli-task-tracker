@@ -6,7 +6,7 @@
 
 class CLITaskApp {
 
-    public $command = null;
+    public $command;
 
     public function run($argv) {
 
@@ -14,7 +14,7 @@ class CLITaskApp {
 
         switch ($this->command) {
             case 'add':
-                $title = $argv[2];
+                $this->add($argv[2]);
                 break;
             case 'update':
                 break;
@@ -33,6 +33,20 @@ class CLITaskApp {
 
     public function setCommand($command) {
         $this->command = $command;
+    }
+
+    public function createTask($id, $description, $status, $createdAt, $updatedAt)
+    {
+        return ['id' => $id, 'description' => $description, 'status' => $status, 'createdAt' => $createdAt, 'updatedAt' => $updatedAt];
+    }
+
+    public function add($description)
+    {
+        $tasks = file_get_contents('tasks.json');
+        $tempTasks = json_decode($tasks, true);
+
+        $tempTasks[] = $this->createTask(1, $description, 'todo', date('Y-m-d H:i:s'), date('Y-m-d H:i:s'));
+        file_put_contents('tasks.json', json_encode($tempTasks));
     }
 }
 
