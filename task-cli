@@ -1,12 +1,22 @@
 #!/usr/bin/php
 
 <?php
-
-// argc - argv
-
 class CLITaskApp {
 
     public $command;
+    public $tasks = array();
+
+    public function __construct()
+    {
+        if (!file_exists('tasks.json')) {
+            fopen('tasks.json', 'w');
+        }
+
+        $tasks = file_get_contents('tasks.json');
+        $tasks = json_decode($tasks, true);
+
+        $this->tasks = $tasks;
+    }
 
     public function run($argv) {
 
@@ -28,7 +38,7 @@ class CLITaskApp {
                 $this->update((int) $argv[2], $status, true);
                 break;
             case 'list':
-                $this->list($argv[2]);
+                $this->listTasks($argv[2]);
                 break;
             default:
                 echo 'Unknown command: ' . $this->command;
@@ -46,25 +56,21 @@ class CLITaskApp {
 
     public function add($description)
     {
-        $tasks = file_get_contents('tasks.json');
-        $tempTasks = json_decode($tasks, true);
-
         $id = 0;
-        if (!empty($tempTasks)) {
-            $id = max(array_column($tempTasks, 'id'));
+        if (!empty($this->tasks)) {
+            $id = max(array_column($this->tasks, 'id'));
             $id++;
         }
 
-        $tempTasks[] = $this->createTask($id, $description, 'todo', date('Y-m-d H:i:s'), date('Y-m-d H:i:s'));
-        file_put_contents('tasks.json', json_encode($tempTasks, JSON_PRETTY_PRINT));
+        $this->tasks[] = $this->createTask($id, $description, 'todo', date('Y-m-d H:i:s'), date('Y-m-d H:i:s'));
+        file_put_contents('tasks.json', json_encode($this->tasks, JSON_PRETTY_PRINT));
+
+        echo "Task added succesfully (ID: " . $id . ")\n";
     }
 
     public function update($id, $description, $status = false)
     {
-        $tasks = file_get_contents('tasks.json');
-        $tempTasks = json_decode($tasks, true);
-
-        foreach ($tempTasks as &$task) {
+        foreach ($this->tasks as &$task) {
             if ($task['id'] === $id) {
 
                 if ($status) {
@@ -76,30 +82,24 @@ class CLITaskApp {
         }
         unset($task);
 
-        file_put_contents('tasks.json', json_encode($tempTasks, JSON_PRETTY_PRINT));
+        file_put_contents('tasks.json', json_encode($this->tasks, JSON_PRETTY_PRINT));
     }
 
     public function delete($id)
     {
-        $tasks = file_get_contents('tasks.json');
-        $tempTasks = json_decode($tasks, true);
-
-        foreach ($tempTasks as $key => $task) {
+        foreach ($this->tasks as $key => $task) {
             if ($task['id'] === $id) {
-               unset($tempTasks[$key]);
+               unset($this->tasks[$key]);
             }
         }
 
-        $tempTasks = array_values($tempTasks);
-        file_put_contents('tasks.json', json_encode($tempTasks, JSON_PRETTY_PRINT));
+        $this->tasks = array_values($this->tasks);
+        file_put_contents('tasks.json', json_encode($this->tasks, JSON_PRETTY_PRINT));
     }
 
-    public function list($status = null)
+    public function listTasks($status = null)
     {
-        $tasks = file_get_contents('tasks.json');
-        $tempTasks = json_decode($tasks, true);
-
-        foreach ($tempTasks as $task) {
+        foreach ($this->tasks as $task) {
             if (!empty($status) && $status !== $task['status']) {
                 continue;
             }
