@@ -2,7 +2,7 @@
     {
         "id": 3,
         "description": "task 3",
-        "status": "todo",
+        "status": "done",
         "createdAt": "2025-03-31 01:55:56",
         "updatedAt": "2025-03-31 01:55:56"
     }

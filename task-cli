@@ -23,8 +23,10 @@ class CLITaskApp {
                 $this->delete((int) $argv[2]);
                 break;
             case 'mark-in-progress':
-                break;
             case 'mark-done':
+                $status = substr($this->command, strlen('mark-'));
+                $this->update((int) $argv[2], $status, true);
+
                 break;
             case 'list':
                 break;
@@ -56,14 +58,19 @@ class CLITaskApp {
         file_put_contents('tasks.json', json_encode($tempTasks, JSON_PRETTY_PRINT));
     }
 
-    public function update($id, $description)
+    public function update($id, $description, $status = false)
     {
         $tasks = file_get_contents('tasks.json');
         $tempTasks = json_decode($tasks, true);
 
         foreach ($tempTasks as &$task) {
             if ($task['id'] === $id) {
-                $task['description'] = $description;
+
+                if ($status) {
+                    $task['status'] = $description;
+                } else {
+                    $task['description'] = $description;
+                }
             }
         }
         unset($task);
