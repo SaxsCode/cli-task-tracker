@@ -17,6 +17,7 @@ class CLITaskApp {
                 $this->add($argv[2]);
                 break;
             case 'update':
+                $this->update((int) $argv[2], $argv[3]);
                 break;
             case 'delete':
                 break;
@@ -45,13 +46,27 @@ class CLITaskApp {
         $tasks = file_get_contents('tasks.json');
         $tempTasks = json_decode($tasks, true);
 
-        $id = 1;
         if (!empty($tempTasks)) {
             $id = max(array_column($tempTasks, 'id'));
             $id++;
         }
 
         $tempTasks[] = $this->createTask($id, $description, 'todo', date('Y-m-d H:i:s'), date('Y-m-d H:i:s'));
+        file_put_contents('tasks.json', json_encode($tempTasks, JSON_PRETTY_PRINT));
+    }
+
+    public function update($id, $description)
+    {
+        $tasks = file_get_contents('tasks.json');
+        $tempTasks = json_decode($tasks, true);
+
+        foreach ($tempTasks as &$task) {
+            if ($task['id'] === $id) {
+                $task['description'] = $description;
+            }
+        }
+        unset($task);
+
         file_put_contents('tasks.json', json_encode($tempTasks, JSON_PRETTY_PRINT));
     }
 }
