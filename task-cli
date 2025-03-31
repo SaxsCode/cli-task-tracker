@@ -22,11 +22,19 @@ class CLITaskApp {
 
         $this->setCommand($argv[1]);
 
+        if (!isset($argv[2]) && $this->command !== 'list') {
+            echo "ERROR: Provide an argument";
+            return;
+        }
+
         switch ($this->command) {
             case 'add':
                 $this->add($argv[2]);
                 break;
             case 'update':
+                if (!isset($argv[3])) {
+                    echo "ERROR: Provide a description";
+                }
                 $this->update((int) $argv[2], $argv[3]);
                 break;
             case 'delete':
@@ -38,6 +46,11 @@ class CLITaskApp {
                 $this->update((int) $argv[2], $status, true);
                 break;
             case 'list':
+                if (!in_array($argv[2], ['todo', 'done', 'in-progress'])) {
+                    echo "ERROR: " . $argv[2] . " is not a valid status";
+                    return;
+                }
+
                 $this->listTasks($argv[2]);
                 break;
             default:
@@ -54,6 +67,11 @@ class CLITaskApp {
         return ['id' => $id, 'description' => $description, 'status' => $status, 'createdAt' => $createdAt, 'updatedAt' => $updatedAt];
     }
 
+    public function save()
+    {
+        file_put_contents('tasks.json', json_encode($this->tasks, JSON_PRETTY_PRINT));
+    }
+
     public function add($description)
     {
         $id = 0;
@@ -63,7 +81,7 @@ class CLITaskApp {
         }
 
         $this->tasks[] = $this->createTask($id, $description, 'todo', date('Y-m-d H:i:s'), date('Y-m-d H:i:s'));
-        file_put_contents('tasks.json', json_encode($this->tasks, JSON_PRETTY_PRINT));
+        $this->save();
 
         echo "Task added succesfully (ID: " . $id . ")\n";
     }
@@ -81,8 +99,7 @@ class CLITaskApp {
             }
         }
         unset($task);
-
-        file_put_contents('tasks.json', json_encode($this->tasks, JSON_PRETTY_PRINT));
+        $this->save();
     }
 
     public function delete($id)
@@ -94,7 +111,7 @@ class CLITaskApp {
         }
 
         $this->tasks = array_values($this->tasks);
-        file_put_contents('tasks.json', json_encode($this->tasks, JSON_PRETTY_PRINT));
+        $this->save();
     }
 
     public function listTasks($status = null)
